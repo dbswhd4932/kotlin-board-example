@@ -30,6 +30,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")  // Kotlin 리플렉션 (Spring에서 필요)
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")  // Kotlin 표준 라이브러리
 
+    // QueryDSL (타입 안전한 동적 쿼리 빌더)
+    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
     // H2 Database (개발용)
     runtimeOnly("com.h2database:h2")
 
