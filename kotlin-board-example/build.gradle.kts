@@ -3,9 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.4"
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"  // Spring용 Kotlin 플러그인 (Java의 @Component 등을 open class로 만들어줌)
-    kotlin("plugin.jpa") version "1.9.20"     // JPA용 Kotlin 플러그인 (Entity를 open class로 만들어줌)
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.spring") version "2.0.21"
+    kotlin("plugin.jpa") version "2.0.21"
+    kotlin("kapt") version "2.0.21"
 }
 
 group = "com.example"
@@ -22,8 +23,9 @@ repositories {
 // QueryDSL generated sources를 sourceSets에 추가
 sourceSets {
     main {
-        java {
-            srcDir("build/generated/sources/annotationProcessor/java/main")
+        kotlin {
+            srcDir("src/main/kotlin")
+            srcDir("build/generated/source/kapt/main")  // kapt로 생성된 Q 클래스
         }
     }
 }
@@ -41,9 +43,7 @@ dependencies {
 
     // QueryDSL (타입 안전한 동적 쿼리 빌더)
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
-    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
-    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 
     // H2 Database (개발용)
     runtimeOnly("com.h2database:h2")
@@ -52,6 +52,25 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.8")  // Kotlin 전용 Mocking 라이브러리
     testImplementation("com.ninja-squad:springmockk:4.0.2")  // Spring + MockK 통합
+}
+
+// kapt에 Java 컴파일러 모듈 접근 권한 부여 (Java 9+ 모듈 시스템 대응)
+tasks.withType<org.jetbrains.kotlin.gradle.internal.KaptGenerateStubsTask> {
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs = listOf(
+            "-Xjvm-default=all",
+            "-Xjsr305=strict"
+        )
+    }
+}
+
+kapt {
+    arguments {
+        arg("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+        arg("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+        arg("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+    }
 }
 
 tasks.withType<KotlinCompile> {

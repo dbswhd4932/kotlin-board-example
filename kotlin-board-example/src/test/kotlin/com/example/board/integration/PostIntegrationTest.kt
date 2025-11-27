@@ -1,8 +1,8 @@
 package com.example.board.integration
 
-import com.example.board.dto.PostDtoKt
-import com.example.board.entity.PostKt
-import com.example.board.repository.PostRepositoryKt
+import com.example.board.dto.PostDto
+import com.example.board.entity.Post
+import com.example.board.repository.PostRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -47,7 +47,7 @@ class PostIntegrationTest {
     private lateinit var objectMapper: ObjectMapper
 
     @Autowired
-    private lateinit var postRepositoryKt: PostRepositoryKt
+    private lateinit var postRepositoryKt: PostRepository
 
     @BeforeEach
     fun setUp() {
@@ -59,7 +59,7 @@ class PostIntegrationTest {
     @DisplayName("[통합] 게시글 생성 → 조회 → 수정 → 삭제 전체 플로우")
     fun fullCrudFlow() {
         // 1. 게시글 생성
-        val createRequest = PostDtoKt.CreatePostRequest(
+        val createRequest = PostDto.CreatePostRequest(
             title = "통합 테스트 게시글",
             content = "통합 테스트 내용",
             author = "테스터"
@@ -77,7 +77,7 @@ class PostIntegrationTest {
 
         val createdPost = objectMapper.readValue(
             createResult.response.contentAsString,
-            PostDtoKt.PostResponse::class.java
+            PostDto.PostResponse::class.java
         )
         val postId = createdPost.id
 
@@ -94,7 +94,7 @@ class PostIntegrationTest {
             .andExpect(jsonPath("$.content").value("통합 테스트 내용"))
 
         // 3. 게시글 수정
-        val updateRequest = PostDtoKt.UpdatePostRequest(
+        val updateRequest = PostDto.UpdatePostRequest(
             title = "수정된 제목",
             content = "수정된 내용"
         )
@@ -130,7 +130,7 @@ class PostIntegrationTest {
         // Given: 15개의 게시글 생성
         repeat(15) { index ->
             postRepositoryKt.save(
-                PostKt(
+                Post(
                     title = "제목 ${index + 1}",
                     content = "내용 ${index + 1}",
                     author = "작성자 ${index + 1}"
@@ -167,9 +167,9 @@ class PostIntegrationTest {
     @DisplayName("[통합] 게시글 검색 - 키워드")
     fun searchPosts() {
         // Given
-        postRepositoryKt.save(PostKt(title = "코틀린 공부", content = "재미있다", author = "학생1"))
-        postRepositoryKt.save(PostKt(title = "자바 공부", content = "어렵다", author = "학생2"))
-        postRepositoryKt.save(PostKt(title = "스프링 공부", content = "코틀린과 함께", author = "학생3"))
+        postRepositoryKt.save(Post(title = "코틀린 공부", content = "재미있다", author = "학생1"))
+        postRepositoryKt.save(Post(title = "자바 공부", content = "어렵다", author = "학생2"))
+        postRepositoryKt.save(Post(title = "스프링 공부", content = "코틀린과 함께", author = "학생3"))
 
         // When & Then: "코틀린" 검색 (제목 또는 내용)
         mockMvc.perform(
@@ -194,7 +194,7 @@ class PostIntegrationTest {
     @DisplayName("[통합] Validation 검증 - 빈 제목")
     fun createPost_ValidationFailed() {
         // Given: 제목이 빈 요청
-        val invalidRequest = PostDtoKt.CreatePostRequest(
+        val invalidRequest = PostDto.CreatePostRequest(
             title = "",  // 빈 제목 (Validation 실패)
             content = "내용",
             author = "작성자"
@@ -227,7 +227,7 @@ class PostIntegrationTest {
     @DisplayName("[통합] 게시글과 댓글 함께 조회 (N+1 방지)")
     fun getPostWithComments() {
         // Given: 게시글과 댓글 생성
-        val post = PostKt(
+        val post = Post(
             title = "게시글",
             content = "내용",
             author = "작성자"
@@ -247,7 +247,7 @@ class PostIntegrationTest {
     fun concurrentPostCreation() {
         // Given: 10개의 생성 요청
         val requests = (1..10).map { index ->
-            PostDtoKt.CreatePostRequest(
+            PostDto.CreatePostRequest(
                 title = "제목 $index",
                 content = "내용 $index",
                 author = "작성자 $index"

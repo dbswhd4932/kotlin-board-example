@@ -1,8 +1,8 @@
 package com.example.board.service
 
-import com.example.board.dto.PostDtoKt
-import com.example.board.entity.PostKt
-import com.example.board.repository.PostRepositoryKt
+import com.example.board.dto.PostDto
+import com.example.board.entity.Post
+import com.example.board.repository.PostRepository
 import io.mockk.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 
 /**
- * PostServiceKt 단위 테스트
+ * PostService 단위 테스트
  *
  * [MockK 사용]
  * - Kotlin 전용 Mocking 라이브러리
@@ -29,17 +29,17 @@ import org.springframework.data.repository.findByIdOrNull
  * - mockk<Type>() - Mock 생성
  * - every { } returns - Stub 정의
  */
-@DisplayName("PostServiceKt 단위 테스트")
-class PostServiceKtTest {
+@DisplayName("PostService 단위 테스트")
+class PostServiceTest {
 
-    private lateinit var postServiceKt: PostServiceKt
-    private lateinit var postRepositoryKt: PostRepositoryKt
+    private lateinit var postServiceKt: PostService
+    private lateinit var postRepositoryKt: PostRepository
 
     @BeforeEach
     fun setUp() {
         // MockK로 Repository Mock 생성
-        postRepositoryKt = mockk<PostRepositoryKt>()
-        postServiceKt = PostServiceKt(postRepositoryKt)
+        postRepositoryKt = mockk<PostRepository>()
+        postServiceKt = PostService(postRepositoryKt)
     }
 
     @AfterEach
@@ -54,8 +54,8 @@ class PostServiceKtTest {
         // Given
         val pageable = PageRequest.of(0, 10)
         val posts = listOf(
-            PostKt(id = 1L, title = "제목1", content = "내용1", author = "작성자1"),
-            PostKt(id = 2L, title = "제목2", content = "내용2", author = "작성자2")
+            Post(id = 1L, title = "제목1", content = "내용1", author = "작성자1"),
+            Post(id = 2L, title = "제목2", content = "내용2", author = "작성자2")
         )
         val page = PageImpl(posts, pageable, posts.size.toLong())
 
@@ -80,7 +80,7 @@ class PostServiceKtTest {
     fun getPost() {
         // Given
         val postId = 1L
-        val post = PostKt(
+        val post = Post(
             id = postId,
             title = "테스트 게시글",
             content = "테스트 내용",
@@ -125,7 +125,7 @@ class PostServiceKtTest {
         val keyword = "테스트"
         val pageable = PageRequest.of(0, 10)
         val posts = listOf(
-            PostKt(id = 1L, title = "테스트 제목", content = "내용", author = "작성자")
+            Post(id = 1L, title = "테스트 제목", content = "내용", author = "작성자")
         )
         val page = PageImpl(posts, pageable, posts.size.toLong())
 
@@ -145,13 +145,13 @@ class PostServiceKtTest {
     @DisplayName("게시글을 생성할 수 있다")
     fun createPost() {
         // Given
-        val request = PostDtoKt.CreatePostRequest(
+        val request = PostDto.CreatePostRequest(
             title = "새 게시글",
             content = "새 내용",
             author = "새 작성자"
         )
 
-        val savedPost = PostKt(
+        val savedPost = Post(
             id = 1L,
             title = request.title,
             content = request.content,
@@ -159,7 +159,7 @@ class PostServiceKtTest {
         )
 
         // slot을 사용하여 save에 전달된 인자를 캡처
-        val postSlot = slot<PostKt>()
+        val postSlot = slot<Post>()
         every { postRepositoryKt.save(capture(postSlot)) } returns savedPost
 
         // When
@@ -181,14 +181,14 @@ class PostServiceKtTest {
     fun updatePost() {
         // Given
         val postId = 1L
-        val existingPost = PostKt(
+        val existingPost = Post(
             id = postId,
             title = "기존 제목",
             content = "기존 내용",
             author = "작성자"
         )
 
-        val request = PostDtoKt.UpdatePostRequest(
+        val request = PostDto.UpdatePostRequest(
             title = "수정된 제목",
             content = "수정된 내용"
         )
@@ -219,7 +219,7 @@ class PostServiceKtTest {
     fun updatePost_NotFound() {
         // Given
         val postId = 999L
-        val request = PostDtoKt.UpdatePostRequest(
+        val request = PostDto.UpdatePostRequest(
             title = "수정된 제목",
             content = "수정된 내용"
         )

@@ -1,7 +1,7 @@
 package com.example.board.repository
 
-import com.example.board.entity.CommentsKt
-import com.example.board.entity.PostKt
+import com.example.board.entity.Comment
+import com.example.board.entity.Post
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.PageRequest
 
 /**
- * PostRepositoryKt 테스트
+ * PostRepository 테스트
  *
  * [@DataJpaTest]
  * - JPA 관련 컴포넌트만 로드 (경량 테스트)
@@ -24,25 +24,25 @@ import org.springframework.data.domain.PageRequest
  * - DisplayName - 한글로 테스트 설명
  */
 @DataJpaTest
-@DisplayName("PostRepositoryKt 테스트")
-class PostRepositoryKtTest {
+@DisplayName("PostRepository 테스트")
+class PostRepositoryTest {
 
     @Autowired
-    private lateinit var postRepositoryKt: PostRepositoryKt
+    private lateinit var postRepositoryKt: PostRepository
 
-    private lateinit var savedPost1: PostKt
-    private lateinit var savedPost2: PostKt
+    private lateinit var savedPost1: Post
+    private lateinit var savedPost2: Post
 
     @BeforeEach
     fun setUp() {
         // Given: 테스트 데이터 준비
-        val post1 = PostKt(
+        val post1 = Post(
             title = "첫 번째 게시글",
             content = "첫 번째 내용",
             author = "홍길동"
         )
 
-        val post2 = PostKt(
+        val post2 = Post(
             title = "두 번째 게시글",
             content = "두 번째 내용",
             author = "김철수"
@@ -56,7 +56,7 @@ class PostRepositoryKtTest {
     @DisplayName("게시글을 저장할 수 있다")
     fun savePost() {
         // Given
-        val post = PostKt(
+        val post = Post(
             title = "테스트 게시글",
             content = "테스트 내용",
             author = "테스터"
@@ -129,18 +129,18 @@ class PostRepositoryKtTest {
     @DisplayName("게시글과 댓글을 함께 조회할 수 있다 (Fetch Join)")
     fun findByIdWithComments() {
         // Given: 댓글이 있는 게시글 생성
-        val post = PostKt(
+        val post = Post(
             title = "댓글 테스트",
             content = "내용",
             author = "작성자"
         )
         val savedPost = postRepositoryKt.save(post)
 
-        val comment1 = CommentsKt(
+        val comment1 = Comment(
             content = "댓글1",
             author = "댓글작성자1"
         )
-        val comment2 = CommentsKt(
+        val comment2 = Comment(
             content = "댓글2",
             author = "댓글작성자2"
         )

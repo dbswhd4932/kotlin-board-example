@@ -1,7 +1,7 @@
 package com.example.board.controller
 
-import com.example.board.dto.PostDtoKt
-import com.example.board.service.PostServiceKt
+import com.example.board.dto.PostDto
+import com.example.board.service.PostService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDateTime
 
 /**
- * PostControllerKt 테스트
+ * PostController 테스트
  *
  * [@WebMvcTest]
  * - Controller 레이어만 테스트 (경량)
@@ -31,9 +31,9 @@ import java.time.LocalDateTime
  * - mockMvc.perform { } - DSL 스타일
  * - ObjectMapper - JSON 직렬화
  */
-@WebMvcTest(PostControllerKt::class)
-@DisplayName("PostControllerKt 컨트롤러 테스트")
-class PostControllerKtTest {
+@WebMvcTest(PostController::class)
+@DisplayName("PostController 컨트롤러 테스트")
+class PostControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -42,14 +42,14 @@ class PostControllerKtTest {
     private lateinit var objectMapper: ObjectMapper
 
     @MockkBean
-    private lateinit var postServiceKt: PostServiceKt
+    private lateinit var postServiceKt: PostService
 
     @Test
     @DisplayName("GET /api/posts/kt - 게시글 목록 조회")
     fun getPosts() {
         // Given
         val posts = listOf(
-            PostDtoKt.PostResponse(
+            PostDto.PostResponse(
                 id = 1L,
                 title = "제목1",
                 content = "내용1",
@@ -58,7 +58,7 @@ class PostControllerKtTest {
                 updatedAt = LocalDateTime.now(),
                 commentCount = 0
             ),
-            PostDtoKt.PostResponse(
+            PostDto.PostResponse(
                 id = 2L,
                 title = "제목2",
                 content = "내용2",
@@ -69,7 +69,7 @@ class PostControllerKtTest {
             )
         )
 
-        val response = PostDtoKt.PostListResponse(
+        val response = PostDto.PostListResponse(
             posts = posts,
             totalElements = 2L,
             totalPages = 1,
@@ -104,7 +104,7 @@ class PostControllerKtTest {
     fun getPost() {
         // Given
         val postId = 1L
-        val response = PostDtoKt.PostDetailResponse(
+        val response = PostDto.PostDetailResponse(
             id = postId,
             title = "테스트 제목",
             content = "테스트 내용",
@@ -151,7 +151,7 @@ class PostControllerKtTest {
         // Given
         val keyword = "테스트"
         val posts = listOf(
-            PostDtoKt.PostResponse(
+            PostDto.PostResponse(
                 id = 1L,
                 title = "테스트 제목",
                 content = "내용",
@@ -162,7 +162,7 @@ class PostControllerKtTest {
             )
         )
 
-        val response = PostDtoKt.PostListResponse(
+        val response = PostDto.PostListResponse(
             posts = posts,
             totalElements = 1L,
             totalPages = 1,
@@ -191,13 +191,13 @@ class PostControllerKtTest {
     @DisplayName("POST /api/posts/kt - 게시글 생성")
     fun createPost() {
         // Given
-        val request = PostDtoKt.CreatePostRequest(
+        val request = PostDto.CreatePostRequest(
             title = "새 게시글",
             content = "새 내용",
             author = "작성자"
         )
 
-        val response = PostDtoKt.PostResponse(
+        val response = PostDto.PostResponse(
             id = 1L,
             title = request.title,
             content = request.content,
@@ -254,12 +254,12 @@ class PostControllerKtTest {
     fun updatePost() {
         // Given
         val postId = 1L
-        val request = PostDtoKt.UpdatePostRequest(
+        val request = PostDto.UpdatePostRequest(
             title = "수정된 제목",
             content = "수정된 내용"
         )
 
-        val response = PostDtoKt.PostResponse(
+        val response = PostDto.PostResponse(
             id = postId,
             title = request.title,
             content = request.content,
