@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * TODO: Java의 CommentService를 Kotlin으로 변환
+ * Java의 CommentService를 Kotlin으로 변환
  *
  * 학습 목표:
  * 1. @Service, @Transactional 어노테이션 사용법
@@ -15,12 +15,6 @@ import org.springframework.transaction.annotation.Transactional
  * 3. Optional 대신 Kotlin의 nullable 타입 활용
  * 4. Stream API 대신 Kotlin의 Collection 확장 함수 사용
  * 5. Elvis 연산자(?:)를 활용한 예외 처리
- *
- * 구현해야 할 기능:
- * - getCommentsByPostId: 특정 게시글의 댓글 목록 조회
- * - createComment: 댓글 생성
- * - updateComment: 댓글 수정
- * - deleteComment: 댓글 삭제
  *
  * Kotlin 변환 포인트:
  * 1. Optional 처리
@@ -51,28 +45,25 @@ import org.springframework.transaction.annotation.Transactional
  *            )
  */
 @Service
-@Transactional(readOnly = true)
 class CommentServiceKt(
-    // TODO: Repository 의존성 주입
-    // private val commentRepository: CommentRepositoryKt,
-    // private val postRepository: PostRepositoryKt
+    private val commentRepository: CommentRepositoryKt,
+    private val postRepository: PostRepositoryKt
 ) {
 
     /**
-     * TODO: 특정 게시글의 댓글 목록 조회
-     *
      * 구현 힌트:
      * 1. commentRepository.findByPostId(postId) 호출
      * 2. 결과를 map을 사용하여 CommentResponse로 변환
      * 3. Java의 .stream().map().collect() 대신 Kotlin의 .map() 사용
      */
-    // fun getCommentsByPostId(postId: Long): List<CommentDtoKt.CommentResponse> {
-    //     TODO("댓글 목록을 조회하고 DTO로 변환하세요")
-    // }
+    @Transactional(readOnly = true)
+    fun getCommentsByPostId(postId: Long): List<CommentDtoKt.CommentResponse> {
+        return commentRepository.findByPostId(postId).map {
+            CommentDtoKt.CommentResponse.from(it)
+        }
+    }
 
     /**
-     * TODO: 댓글 생성
-     *
      * 구현 힌트:
      * 1. postRepository.findById(postId)로 게시글 조회
      * 2. Elvis 연산자(?:)를 사용하여 없으면 예외 발생
@@ -82,36 +73,57 @@ class CommentServiceKt(
      * 6. 양방향 연관관계 설정: post.addComment(savedComment)
      * 7. CommentResponse.from(savedComment) 반환
      */
-    // @Transactional
-    // fun createComment(postId: Long, request: CommentDtoKt.CreateCommentRequest): CommentDtoKt.CommentResponse {
-    //     TODO("댓글을 생성하고 저장하세요")
-    // }
+    @Transactional
+    fun createComment(
+        postId: Long,
+        request: CommentDtoKt.CreateCommentRequest
+    ): CommentDtoKt.CommentResponse {
+        val post = postRepository.findById(postId).orElse(null)
+            ?: throw IllegalArgumentException("게시글을 찾을 수 없습니다. id: $postId")
+
+        val comment = request.toEntity().apply { this.post = post }
+
+        val savedComment = commentRepository.save(comment)
+
+        post.addComment(savedComment)
+        return CommentDtoKt.CommentResponse.from(savedComment)
+    }
+
 
     /**
-     * TODO: 댓글 수정
-     *
      * 구현 힌트:
      * 1. commentRepository.findById(commentId)로 댓글 조회
      * 2. Elvis 연산자로 없으면 예외 발생
      * 3. comment.update(request.content)로 업데이트 (dirty checking)
      * 4. CommentResponse.from(comment) 반환
      */
-    // @Transactional
-    // fun updateComment(commentId: Long, request: CommentDtoKt.UpdateCommentRequest): CommentDtoKt.CommentResponse {
-    //     TODO("댓글을 수정하세요")
-    // }
+    @Transactional
+    fun updateComment(
+        commentId: Long,
+        request: CommentDtoKt.UpdateCommentRequest
+    ): CommentDtoKt.CommentResponse {
+        val comment = commentRepository.findById(commentId).orElse(null)
+            ?: throw IllegalArgumentException("댓글을 찾을 수 없습니다. id: $commentId")
+
+        // 변수 자체를 재할당 하는것이 아니기 떄문에 val 사용
+        comment.update(request.content)
+
+        return CommentDtoKt.CommentResponse.from(comment)
+    }
 
     /**
-     * TODO: 댓글 삭제
-     *
      * 구현 힌트:
      * 1. commentRepository.findById(commentId)로 댓글 조회
      * 2. Elvis 연산자로 없으면 예외 발생
      * 3. comment.post?.removeComment(comment)로 양방향 연관관계 제거 (?.let 사용)
      * 4. commentRepository.delete(comment)로 삭제
      */
-    // @Transactional
-    // fun deleteComment(commentId: Long) {
-    //     TODO("댓글을 삭제하세요")
-    // }
+    @Transactional
+    fun deleteComment(commentId: Long) {
+        val comment = commentRepository.findById(commentId).orElse(null)
+            ?: throw IllegalArgumentException("댓글을 찾을 수 없습니다. id: $commentId")
+
+        comment.post?.removeComment(comment)
+        commentRepository.delete(comment)
+    }
 }
