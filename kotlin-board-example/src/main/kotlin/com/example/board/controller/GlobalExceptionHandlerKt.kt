@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
 
 /**
- * TODO: Java의 GlobalExceptionHandler를 Kotlin으로 변환
+ * Java의 GlobalExceptionHandler를 Kotlin으로 변환
  *
  * 학습 목표:
  * 1. @RestControllerAdvice 어노테이션 사용법
@@ -45,7 +45,7 @@ import java.time.LocalDateTime
 class GlobalExceptionHandlerKt {
 
     /**
-     * TODO: Validation 예외 처리
+     * Validation 예외 처리
      *
      * 구현 힌트:
      * 1. ex.bindingResult.allErrors를 순회하며 에러 정보 수집
@@ -71,7 +71,7 @@ class GlobalExceptionHandlerKt {
     }
 
     /**
-     * TODO: IllegalArgumentException 처리
+     * IllegalArgumentException 처리
      *
      * 구현 힌트:
      * 1. ex.message를 사용하여 에러 메시지 추출
@@ -92,7 +92,7 @@ class GlobalExceptionHandlerKt {
     }
 
     /**
-     * TODO: 기타 모든 예외 처리
+     * 기타 모든 예외 처리
      *
      * 구현 힌트:
      * 1. 일반적인 서버 에러 메시지 반환

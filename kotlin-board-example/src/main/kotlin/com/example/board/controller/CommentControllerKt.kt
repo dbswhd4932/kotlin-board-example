@@ -8,19 +8,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
- * TODO: Java의 CommentController를 Kotlin으로 변환
+ * Java의 CommentController를 Kotlin으로 변환
  *
  * 학습 목표:
  * 1. @RestController, @RequestMapping 어노테이션 사용법 (Java와 동일)
  * 2. constructor injection 패턴 (Kotlin은 생성자에서 바로 프로퍼티 선언 가능)
  * 3. @PathVariable, @RequestBody, @Valid 어노테이션 활용
  * 4. ResponseEntity 사용법 (Kotlin에서도 동일하게 사용)
- *
- * 구현해야 할 기능:
- * - GET /api/posts/{postId}/comments - 특정 게시글의 댓글 목록 조회
- * - POST /api/posts/{postId}/comments - 댓글 생성
- * - PUT /api/posts/{postId}/comments/{commentId} - 댓글 수정
- * - DELETE /api/posts/{postId}/comments/{commentId} - 댓글 삭제
  *
  * Kotlin 변환 포인트:
  * - Java의 생성자 주입 → Kotlin의 primary constructor로 간결하게 표현
@@ -41,40 +35,42 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/kt/posts/{postId}/comments")
 class CommentControllerKt(
-    // TODO: CommentServiceKt를 의존성 주입 받기
-    // private val commentService: CommentServiceKt
+    private val commentService: CommentServiceKt
 ) {
 
     /**
-     * TODO: 특정 게시글의 댓글 목록 조회
+     * 특정 게시글의 댓글 목록 조회
      * GET /api/kt/posts/{postId}/comments
      *
      * @param postId 게시글 ID
      * @return 댓글 목록
      */
-    // @GetMapping
-    // fun getComments(@PathVariable postId: Long): ResponseEntity<List<CommentDtoKt.CommentResponse>> {
-    //     TODO("Java의 getComments 메서드를 Kotlin으로 변환하세요")
-    // }
+    @GetMapping
+    fun getComments(@PathVariable postId: Long): ResponseEntity<List<CommentDtoKt.CommentResponse>> {
+        val response = commentService.getCommentsByPostId(postId)
+        return ResponseEntity.ok(response)
+    }
 
     /**
-     * TODO: 댓글 생성
+     * 댓글 생성
      * POST /api/kt/posts/{postId}/comments
      *
      * @param postId 게시글 ID
      * @param request 댓글 생성 요청
      * @return 생성된 댓글 정보
      */
-    // @PostMapping
-    // fun createComment(
-    //     @PathVariable postId: Long,
-    //     @Valid @RequestBody request: CommentDtoKt.CreateCommentRequest
-    // ): ResponseEntity<CommentDtoKt.CommentResponse> {
-    //     TODO("Java의 createComment 메서드를 Kotlin으로 변환하세요")
-    // }
+    @PostMapping
+    fun createComment(
+        @PathVariable postId: Long,
+        @Valid @RequestBody request: CommentDtoKt.CreateCommentRequest
+    ): ResponseEntity<CommentDtoKt.CommentResponse> {
+        val response = commentService.createComment(postId, request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    }
+
 
     /**
-     * TODO: 댓글 수정
+     * 댓글 수정
      * PUT /api/kt/posts/{postId}/comments/{commentId}
      *
      * @param postId 게시글 ID
@@ -82,28 +78,32 @@ class CommentControllerKt(
      * @param request 댓글 수정 요청
      * @return 수정된 댓글 정보
      */
-    // @PutMapping("/{commentId}")
-    // fun updateComment(
-    //     @PathVariable postId: Long,
-    //     @PathVariable commentId: Long,
-    //     @Valid @RequestBody request: CommentDtoKt.UpdateCommentRequest
-    // ): ResponseEntity<CommentDtoKt.CommentResponse> {
-    //     TODO("Java의 updateComment 메서드를 Kotlin으로 변환하세요")
-    // }
+    @PutMapping("/{commentId}")
+    fun updateComment(
+        @PathVariable postId: Long,
+        @PathVariable commentId: Long,
+        @Valid @RequestBody request: CommentDtoKt.UpdateCommentRequest
+    ): ResponseEntity<CommentDtoKt.CommentResponse> {
+        val response = commentService.updateComment(commentId, request)
+        return ResponseEntity.ok(response)
+    }
+
 
     /**
-     * TODO: 댓글 삭제
+     * 댓글 삭제
      * DELETE /api/kt/posts/{postId}/comments/{commentId}
      *
      * @param postId 게시글 ID
      * @param commentId 댓글 ID
      * @return 응답 없음 (204 No Content)
      */
-    // @DeleteMapping("/{commentId}")
-    // fun deleteComment(
-    //     @PathVariable postId: Long,
-    //     @PathVariable commentId: Long
-    // ): ResponseEntity<Void> {
-    //     TODO("Java의 deleteComment 메서드를 Kotlin으로 변환하세요")
-    // }
+    @DeleteMapping("/{commentId}")
+    fun deleteComment(
+        @PathVariable postId: Long,
+        @PathVariable commentId: Long
+    ): ResponseEntity<Void> {
+        commentService.deleteComment(commentId)
+        return ResponseEntity.noContent().build()
+    }
+
 }
