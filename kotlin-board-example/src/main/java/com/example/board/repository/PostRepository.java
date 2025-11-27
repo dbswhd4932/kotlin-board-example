@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
+public interface PostRepository extends JpaRepository<Post, Long> {
+    // TODO: PostRepositoryCustom은 삭제되어 상속 제거
 
     // Query Method: 메서드 이름으로 쿼리 생성
     List<Post> findByAuthor(String author);

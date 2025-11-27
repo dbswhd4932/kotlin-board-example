@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface PostRepositoryKt : JpaRepository<PostKt, Long> {
+    // TODO: PostRepositoryCustomKt는 QueryDSL 구현 문제로 인해 임시로 상속 제거
 
     // 작성자로 게시글 조회
     // SELECT * FROM posts WHERE author = ?

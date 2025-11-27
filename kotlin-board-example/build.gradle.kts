@@ -19,6 +19,15 @@ repositories {
     mavenCentral()
 }
 
+// QueryDSL generated sources를 sourceSets에 추가
+sourceSets {
+    main {
+        java {
+            srcDir("build/generated/sources/annotationProcessor/java/main")
+        }
+    }
+}
+
 dependencies {
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")

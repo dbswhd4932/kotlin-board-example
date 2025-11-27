@@ -6,25 +6,12 @@ import org.springframework.data.domain.Pageable
 import java.time.LocalDateTime
 
 /**
- * TODO: Java의 PostRepositoryCustom 인터페이스를 Kotlin으로 변환
+ * Java의 PostRepositoryCustom 인터페이스를 Kotlin으로 변환
  *
  * 학습 목표:
  * 1. Kotlin에서 인터페이스 정의하기
  * 2. nullable 파라미터 사용 (Java의 null 허용 파라미터를 Kotlin의 ? 타입으로)
  * 3. 기본값이 있는 파라미터 활용 (선택적 파라미터)
- *
- * 구현해야 할 메서드:
- * - searchPosts: 복잡한 검색 조건을 사용한 게시글 검색
- * - searchByTitleContentAuthor: 제목, 내용, 작성자로 동적 검색
- * - searchByDateRange: 날짜 범위로 검색
- * - findPostsWithComments: 댓글이 있는 게시글만 조회
- * - findPostsWithoutComments: 댓글이 없는 게시글만 조회
- * - countPostsByAuthor: 작성자별 게시글 수 통계
- * - findRecentPosts: 최근 N일 이내 작성된 게시글 조회
- * - findPopularPosts: 인기 게시글 조회 (댓글 수 기준)
- * - searchTitleOrContent: 제목 또는 내용에 키워드 포함
- * - findByCommentCountBetween: 특정 댓글 수 범위의 게시글 조회
- * - findByAuthors: 여러 작성자의 게시글 조회
  *
  * Kotlin 변환 포인트:
  * 1. nullable 파라미터
@@ -64,81 +51,81 @@ interface PostRepositoryCustomKt {
      * @param pageable 페이징 정보
      * @return 검색된 게시글 Page
      */
-    // fun searchPosts(
-    //     titleContains: String? = null,
-    //     contentContains: String? = null,
-    //     authorEquals: String? = null,
-    //     authorsIn: List<String>? = null,
-    //     createdAfter: LocalDateTime? = null,
-    //     createdBefore: LocalDateTime? = null,
-    //     updatedAfter: LocalDateTime? = null,
-    //     updatedBefore: LocalDateTime? = null,
-    //     minCommentCount: Int? = null,
-    //     maxCommentCount: Int? = null,
-    //     keyword: String? = null,
-    //     pageable: Pageable
-    // ): Page<Post>
+    fun searchPosts(
+        titleContains: String? = null,
+        contentContains: String? = null,
+        authorEquals: String? = null,
+        authorsIn: List<String>? = null,
+        createdAfter: LocalDateTime? = null,
+        createdBefore: LocalDateTime? = null,
+        updatedAfter: LocalDateTime? = null,
+        updatedBefore: LocalDateTime? = null,
+        minCommentCount: Int? = null,
+        maxCommentCount: Int? = null,
+        keyword: String? = null,
+        pageable: Pageable
+    ): Page<Post>
 
     /**
      * TODO: 제목, 내용, 작성자로 동적 검색
      */
-    // fun searchByTitleContentAuthor(
-    //     title: String?,
-    //     content: String?,
-    //     author: String?,
-    //     pageable: Pageable
-    // ): Page<Post>
+    fun searchByTitleContentAuthor(
+        title: String?,
+        content: String?,
+        author: String?,
+        pageable: Pageable
+    ): Page<Post>
 
     /**
      * TODO: 날짜 범위로 검색
      */
-    // fun searchByDateRange(
-    //     startDate: LocalDateTime?,
-    //     endDate: LocalDateTime?,
-    //     pageable: Pageable
-    // ): Page<Post>
+    fun searchByDateRange(
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        pageable: Pageable
+    ): Page<Post>
 
     /**
      * TODO: 댓글이 있는 게시글만 조회
      */
-    // fun findPostsWithComments(pageable: Pageable): Page<Post>
+    fun findPostsWithComments(pageable: Pageable): Page<Post>
 
     /**
      * TODO: 댓글이 없는 게시글만 조회
      */
-    // fun findPostsWithoutComments(pageable: Pageable): Page<Post>
+    fun findPostsWithoutComments(pageable: Pageable): Page<Post>
 
     /**
      * TODO: 작성자별 게시글 수 통계
      */
-    // fun countPostsByAuthor(): Map<String, Long>
+    fun countPostsByAuthor(): Map<String, Long>
 
     /**
      * TODO: 최근 N일 이내 작성된 게시글 조회
      */
-    // fun findRecentPosts(days: Int, pageable: Pageable): Page<Post>
+    fun findRecentPosts(days: Int, pageable: Pageable): Page<Post>
 
     /**
      * TODO: 인기 게시글 조회 (댓글 수 기준)
      */
-    // fun findPopularPosts(limit: Int): List<Post>
+    fun findPopularPosts(limit: Int): List<Post>
 
     /**
      * TODO: 제목 또는 내용에 키워드 포함
      */
-    // fun searchTitleOrContent(keyword: String, pageable: Pageable): Page<Post>
+    fun searchTitleOrContent(keyword: String, pageable: Pageable): Page<Post>
 
     /**
      * TODO: 특정 댓글 수 범위의 게시글 조회
      */
-    // fun findByCommentCountBetween(
-    //     minCount: Int?,
-    //     maxCount: Int?,
-    //     pageable: Pageable
-    // ): Page<Post>
+    fun findByCommentCountBetween(
+        minCount: Int?,
+        maxCount: Int?,
+        pageable: Pageable
+    ): Page<Post>
 
     /**
      * TODO: 여러 작성자의 게시글 조회
      */
-    // fun findByAuthors(authors: List<String>, pageable: Pageable): Page<Post>
+    fun findByAuthors(authors: List<String>, pageable: Pageable): Page<Post>
 }
