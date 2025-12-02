@@ -5,7 +5,6 @@ import com.example.board.entity.QPost
 import com.example.board.entity.QComment
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.types.dsl.BooleanExpression
-import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
@@ -123,37 +122,59 @@ class PostRepositoryImpl(
             )
         }
 
-        // 8. 댓글 수 범위 (Subquery)
-        if (minCommentCount != null || maxCommentCount != null) {
-            val commentCountSubquery = JPAExpressions
-                .select(comment.count())
-                .from(comment)
-                .where(comment.post.id.eq(post.id))
-
-            minCommentCount?.let {
-                builder.and(commentCountSubquery.goe(it.toLong()))
-            }
-
-            maxCommentCount?.let {
-                builder.and(commentCountSubquery.loe(it.toLong()))
-            }
-        }
+        // 8. 댓글 수 범위 (LEFT JOIN + GROUP BY + HAVING으로 최적화)
+        val hasCommentCountCondition = minCommentCount != null || maxCommentCount != null
 
         // 쿼리 실행
-        val content = queryFactory
-            .selectFrom(post)
-            .where(builder)
-            .orderBy(post.createdAt.desc())
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .fetch()
+        val content = if (hasCommentCountCondition) {
+            // 댓글 수 조건이 있을 때: LEFT JOIN + GROUP BY + HAVING 사용
+            var query = queryFactory
+                .selectFrom(post)
+                .leftJoin(post.comments, comment)
+                .where(builder)
+                .groupBy(post.id)
+
+            minCommentCount?.let { query = query.having(comment.count().goe(it.toLong())) }
+            maxCommentCount?.let { query = query.having(comment.count().loe(it.toLong())) }
+
+            query
+                .orderBy(post.createdAt.desc())
+                .offset(pageable.offset)
+                .limit(pageable.pageSize.toLong())
+                .fetch()
+        } else {
+            // 댓글 수 조건이 없을 때: 단순 조회
+            queryFactory
+                .selectFrom(post)
+                .where(builder)
+                .orderBy(post.createdAt.desc())
+                .offset(pageable.offset)
+                .limit(pageable.pageSize.toLong())
+                .fetch()
+        }
 
         // 전체 개수 조회
-        val total = queryFactory
-            .select(post.count())
-            .from(post)
-            .where(builder)
-            .fetchOne() ?: 0L
+        val total = if (hasCommentCountCondition) {
+            // 댓글 수 조건이 있을 때: GROUP BY로 조회 후 개수 세기
+            var countQuery = queryFactory
+                .select(post.id)
+                .from(post)
+                .leftJoin(post.comments, comment)
+                .where(builder)
+                .groupBy(post.id)
+
+            minCommentCount?.let { countQuery = countQuery.having(comment.count().goe(it.toLong())) }
+            maxCommentCount?.let { countQuery = countQuery.having(comment.count().loe(it.toLong())) }
+
+            countQuery.fetch().size.toLong()
+        } else {
+            // 댓글 수 조건이 없을 때: COUNT 쿼리
+            queryFactory
+                .select(post.count())
+                .from(post)
+                .where(builder)
+                .fetchOne() ?: 0L
+        }
 
         return PageImpl(content, pageable, total)
     }
@@ -223,44 +244,31 @@ class PostRepositoryImpl(
     }
 
     override fun findPostsWithComments(pageable: Pageable): Page<Post> {
+        // INNER JOIN으로 최적화 (댓글이 있는 게시글만 조회)
         val posts = queryFactory
             .selectFrom(post)
-            .where(
-                JPAExpressions
-                    .selectOne()
-                    .from(comment)
-                    .where(comment.post.id.eq(post.id))
-                    .exists()
-            )
+            .innerJoin(post.comments, comment)
+            .distinct()  // 중복 제거 (게시글이 여러 댓글로 인해 중복될 수 있음)
             .orderBy(post.createdAt.desc())
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch()
 
         val total = queryFactory
-            .select(post.count())
+            .select(post.countDistinct())  // DISTINCT COUNT
             .from(post)
-            .where(
-                JPAExpressions
-                    .selectOne()
-                    .from(comment)
-                    .where(comment.post.id.eq(post.id))
-                    .exists()
-            )
+            .innerJoin(post.comments, comment)
             .fetchOne() ?: 0L
 
         return PageImpl(posts, pageable, total)
     }
 
     override fun findPostsWithoutComments(pageable: Pageable): Page<Post> {
+        // LEFT JOIN + IS NULL로 최적화 (댓글이 없는 게시글 조회)
         val posts = queryFactory
             .selectFrom(post)
-            .where(
-                JPAExpressions
-                    .selectFrom(comment)
-                    .where(comment.post.id.eq(post.id))
-                    .notExists()
-            )
+            .leftJoin(post.comments, comment)
+            .where(comment.id.isNull())  // 댓글이 없는 경우
             .orderBy(post.createdAt.desc())
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -269,13 +277,8 @@ class PostRepositoryImpl(
         val total = queryFactory
             .select(post.count())
             .from(post)
-            .where(
-                JPAExpressions
-                    .selectOne()
-                    .from(comment)
-                    .where(comment.post.id.eq(post.id))
-                    .notExists()
-            )
+            .leftJoin(post.comments, comment)
+            .where(comment.id.isNull())
             .fetchOne() ?: 0L
 
         return PageImpl(posts, pageable, total)
@@ -357,22 +360,22 @@ class PostRepositoryImpl(
     ): Page<Post> {
         var query = queryFactory
             .selectFrom(post)
-            .leftJoin<com.example.board.entity.Comment>(post.comments, comment)
+            .leftJoin(post.comments, comment)
             .groupBy(post.id)
 
         minCount?.let { query = query.having(comment.count().goe(it.toLong())) }
         maxCount?.let { query = query.having(comment.count().loe(it.toLong())) }
 
-        val posts: List<Post> = query
+        val posts = query
             .orderBy(post.createdAt.desc())
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch()
 
         var countQuery = queryFactory
-            .select<Long>(post.count())
+            .select(post.count())
             .from(post)
-            .leftJoin<com.example.board.entity.Comment>(post.comments, comment)
+            .leftJoin(post.comments, comment)
             .groupBy(post.id)
 
         minCount?.let { countQuery = countQuery.having(comment.count().goe(it.toLong())) }
@@ -391,7 +394,7 @@ class PostRepositoryImpl(
             return PageImpl(emptyList(), pageable, 0L)
         }
 
-        val posts: List<Post> = queryFactory
+        val posts = queryFactory
             .selectFrom(post)
             .where(post.author.`in`(authors))
             .orderBy(post.createdAt.desc())
@@ -399,8 +402,8 @@ class PostRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        val total: Long = queryFactory
-            .select<Long>(post.count())
+        val total = queryFactory
+            .select(post.count())
             .from(post)
             .where(post.author.`in`(authors))
             .fetchOne() ?: 0L
