@@ -1,6 +1,6 @@
 package com.example.board.controller
 
-import com.example.board.entity.PostLike
+import com.example.board.dto.PostLikeDto
 import com.example.board.service.PostLikeService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -50,21 +50,20 @@ class PostLikeController(
     fun addLike(
         @PathVariable postId: Long,
         @RequestParam userId: Long
-    ): ResponseEntity<LikeResponse> {
-        // TODO: 1. Service 호출
-        // val like = postLikeService.addLike(postId, userId)
+    ): ResponseEntity<PostLikeDto.LikeResponse> {
+        // 1. Service 호출
+        val like = postLikeService.addLike(postId, userId)
 
-        // TODO: 2. Response DTO 생성
-        // val response = LikeResponse(
-        //     postId = like.postId,
-        //     userId = like.userId,
-        //     message = "좋아요를 추가했습니다"
-        // )
+        // 2. Response DTO 생성
+        val response = PostLikeDto.LikeResponse(
+            postId = like.postId,
+            userId = like.userId,
+            message = "좋아요를 추가했습니다."
+        )
 
-        // TODO: 3. 201 Created 응답
-        // return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        // 3. 201 Created 응답
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
 
-        throw NotImplementedError("TODO: 좋아요 추가 API 구현")
     }
 
     /**
@@ -81,13 +80,11 @@ class PostLikeController(
         @PathVariable postId: Long,
         @RequestParam userId: Long
     ): ResponseEntity<Unit> {
-        // TODO: 1. Service 호출
-        // postLikeService.removeLike(postId, userId)
+        // 1. Service 호출
+        postLikeService.removeLike(postId, userId)
 
-        // TODO: 2. 204 No Content 응답
-        // return ResponseEntity.noContent().build()
-
-        throw NotImplementedError("TODO: 좋아요 취소 API 구현")
+        // 2. 204 No Content 응답
+        return ResponseEntity.noContent().build()
     }
 
     /**
@@ -99,20 +96,18 @@ class PostLikeController(
      * - Data class로 응답
      */
     @GetMapping("/{postId}/likes/count")
-    fun getLikeCount(@PathVariable postId: Long): ResponseEntity<LikeCountResponse> {
-        // TODO: 1. Service 호출
-        // val count = postLikeService.getLikeCount(postId)
+    fun getLikeCount(@PathVariable postId: Long): ResponseEntity<PostLikeDto.LikeCountResponse> {
+        // 1. Service 호출
+        val count = postLikeService.getLikeCount(postId)
 
-        // TODO: 2. Response DTO 생성
-        // val response = LikeCountResponse(
-        //     postId = postId,
-        //     count = count
-        // )
+        // 2. Response DTO 생성
+        val response = PostLikeDto.LikeCountResponse(
+            postId = postId,
+            count = count
+        )
 
-        // TODO: 3. 200 OK 응답
-        // return ResponseEntity.ok(response)
-
-        throw NotImplementedError("TODO: 좋아요 개수 조회 API 구현")
+        // 3. 200 OK 응답
+        return ResponseEntity.ok(response)
     }
 
     /**
@@ -126,21 +121,19 @@ class PostLikeController(
     fun checkLikeStatus(
         @PathVariable postId: Long,
         @RequestParam userId: Long
-    ): ResponseEntity<LikeCheckResponse> {
-        // TODO: 1. Service 호출
-        // val isLiked = postLikeService.isLikedByUser(postId, userId)
+    ): ResponseEntity<PostLikeDto.LikeCheckResponse> {
+        // 1. Service 호출
+        val isLiked = postLikeService.isLikedByUser(postId, userId)
 
-        // TODO: 2. Response DTO 생성
-        // val response = LikeCheckResponse(
-        //     postId = postId,
-        //     userId = userId,
-        //     isLiked = isLiked
-        // )
+        // 2. Response DTO 생성
+        val response = PostLikeDto.LikeCheckResponse(
+            postId = postId,
+            userId = userId,
+            isLiked = isLiked
+        )
 
-        // TODO: 3. 200 OK 응답
-        // return ResponseEntity.ok(response)
-
-        throw NotImplementedError("TODO: 좋아요 여부 확인 API 구현")
+        // 3. 200 OK 응답
+        return ResponseEntity.ok(response)
     }
 
     /**
@@ -152,81 +145,25 @@ class PostLikeController(
      * - map 함수로 Entity -> DTO 변환
      */
     @GetMapping("/{postId}/likes")
-    fun getLikesByPost(@PathVariable postId: Long): ResponseEntity<LikeListResponse> {
-        // TODO: 1. Service 호출
-        // val likes = postLikeService.getLikesByPostId(postId)
+    fun getLikesByPost(@PathVariable postId: Long): ResponseEntity<PostLikeDto.LikeListResponse> {
+        // 1. Service 호출
+        val likes = postLikeService.getLikesByPostId(postId)
 
-        // TODO: 2. Entity -> DTO 변환 (map 함수)
-        // val likeDtos = likes.map { like ->
-        //     LikeDto(
-        //         id = like.id,
-        //         postId = like.postId,
-        //         userId = like.userId,
-        //         createdAt = like.createdAt
-        //     )
-        // }
+        // 2. Entity -> DTO 변환 (map 함수)
+        val likeDtos = likes.map { like ->
+            PostLikeDto.LikeInfo(like.id, like.postId, like.userId, like.createdAt)
+        }
 
-        // TODO: 3. Response DTO 생성
-        // val response = LikeListResponse(
-        //     postId = postId,
-        //     count = likes.size,
-        //     likes = likeDtos
-        // )
+        // 3. Response DTO 생성
+        val response = PostLikeDto.LikeListResponse(
+            postId = postId,
+            count = likes.size,
+            likes = likeDtos
+        )
 
-        // TODO: 4. 200 OK 응답
-        // return ResponseEntity.ok(response)
+        // 4. 200 OK 응답
+        return ResponseEntity.ok(response)
 
-        throw NotImplementedError("TODO: 게시글 좋아요 목록 조회 API 구현")
     }
-
-    // ==================== Response DTOs ====================
-    // TODO: 학습 포인트 - Data Class
-    // - 자동으로 equals, hashCode, toString, copy 생성
-    // - JSON 직렬화/역직렬화에 최적
-    // - Java Record와 유사
-
-    /**
-     * 좋아요 추가/취소 응답
-     */
-    data class LikeResponse(
-        val postId: Long,
-        val userId: Long,
-        val message: String
-    )
-
-    /**
-     * 좋아요 개수 응답
-     */
-    data class LikeCountResponse(
-        val postId: Long,
-        val count: Long
-    )
-
-    /**
-     * 좋아요 여부 확인 응답
-     */
-    data class LikeCheckResponse(
-        val postId: Long,
-        val userId: Long,
-        val isLiked: Boolean
-    )
-
-    /**
-     * 좋아요 목록 조회 응답
-     */
-    data class LikeListResponse(
-        val postId: Long,
-        val count: Int,
-        val likes: List<LikeDto>
-    )
-
-    /**
-     * 좋아요 DTO
-     */
-    data class LikeDto(
-        val id: Long?,
-        val postId: Long,
-        val userId: Long,
-        val createdAt: java.time.LocalDateTime
-    )
 }
+

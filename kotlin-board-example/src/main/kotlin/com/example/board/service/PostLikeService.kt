@@ -28,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional
  */
 @Service
 class PostLikeService(
-    // TODO: 학습 포인트 - Constructor Injection
-    // private val: 불변(final) 프로퍼티로 주입
+    // 학습 포인트 - Constructor Injection
     private val postLikeRepository: PostLikeRepository,
     private val postRepository: PostRepository
 ) {
@@ -44,22 +43,21 @@ class PostLikeService(
      */
     @Transactional
     fun addLike(postId: Long, userId: Long): PostLike {
-        // TODO: 1. 게시글 존재 확인
-        // postRepository.existsById(postId)로 체크
-        // 없으면 IllegalArgumentException("게시글을 찾을 수 없습니다") 던지기
+        // 1. 게시글 존재 확인
+        if (!postRepository.existsById(postId)) {
+            throw IllegalArgumentException("게시글을 찾을 수 없습니다. id: $postId")
+        }
 
-        // TODO: 2. 이미 좋아요 했는지 확인
-        // postLikeRepository.existsByPostIdAndUserId(postId, userId)로 체크
-        // 있으면 IllegalStateException("이미 좋아요를 눌렀습니다") 던지기
+        // 2. 이미 좋아요 했는지 확인
+        if (postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            throw IllegalStateException("이미 좋아요를 눌렀습니다.")
+        }
 
-        // TODO: 3. 좋아요 생성
-        // val like = PostLike(postId = postId, userId = userId)
-        // Named parameter 사용 (순서 상관없이 파라미터 전달)
+        // 3. 좋아요 생성
+        val like = PostLike(postId = postId, userId = userId)
 
-        // TODO: 4. 저장 및 반환
-        // return postLikeRepository.save(like)
-
-        throw NotImplementedError("TODO: 좋아요 추가 로직 구현")
+        // 4. 저장 및 반환
+        return postLikeRepository.save(like)
     }
 
     /**
@@ -72,15 +70,16 @@ class PostLikeService(
      */
     @Transactional
     fun removeLike(postId: Long, userId: Long) {
-        // TODO: 1. 좋아요 존재 확인
+        // 1. 좋아요 존재 확인
         // existsByPostIdAndUserId로 체크
         // 없으면 IllegalArgumentException("좋아요를 찾을 수 없습니다") 던지기
+        if(!postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            throw IllegalArgumentException("좋아요를 찾을 수 없습니다.")
+        }
 
-        // TODO: 2. 좋아요 삭제
-        // postLikeRepository.deleteByPostIdAndUserId(postId, userId)
+        // 2. 좋아요 삭제
         // 반환값(삭제된 개수)을 변수에 저장해도 되고, 무시해도 됨
-
-        throw NotImplementedError("TODO: 좋아요 취소 로직 구현")
+        postLikeRepository.deleteByPostIdAndUserId(postId, userId)
     }
 
     /**
@@ -92,10 +91,7 @@ class PostLikeService(
      */
     @Transactional(readOnly = true)
     fun getLikeCount(postId: Long): Long {
-        // TODO: countByPostId 사용
-        // return postLikeRepository.countByPostId(postId)
-
-        throw NotImplementedError("TODO: 좋아요 개수 조회 로직 구현")
+        return postLikeRepository.countByPostId(postId)
     }
 
     /**
@@ -108,10 +104,7 @@ class PostLikeService(
     @Transactional(readOnly = true)
     fun isLikedByUser(postId: Long, userId: Long): Boolean {
         // TODO: Expression Body로 작성
-        // fun isLikedByUser(...): Boolean =
-        //     postLikeRepository.existsByPostIdAndUserId(postId, userId)
-
-        throw NotImplementedError("TODO: 좋아요 여부 확인 로직 구현")
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId)
     }
 
     /**
@@ -123,10 +116,7 @@ class PostLikeService(
      */
     @Transactional(readOnly = true)
     fun getLikesByPostId(postId: Long): List<PostLike> {
-        // TODO: findAllByPostId 사용
-        // return postLikeRepository.findAllByPostId(postId)
-
-        throw NotImplementedError("TODO: 게시글 좋아요 목록 조회 로직 구현")
+        return postLikeRepository.findAllByPostId(postId)
     }
 
     /**
@@ -138,8 +128,6 @@ class PostLikeService(
      */
     @Transactional(readOnly = true)
     fun getLikesByUserId(userId: Long): List<PostLike> {
-        // TODO: findAllByUserId 사용
-
-        throw NotImplementedError("TODO: 사용자 좋아요 목록 조회 로직 구현")
+        return postLikeRepository.findAllByUserId(userId)
     }
 }
