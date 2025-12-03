@@ -73,7 +73,7 @@ class PostLikeService(
         // 1. 좋아요 존재 확인
         // existsByPostIdAndUserId로 체크
         // 없으면 IllegalArgumentException("좋아요를 찾을 수 없습니다") 던지기
-        if(!postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
+        if (!postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
             throw IllegalArgumentException("좋아요를 찾을 수 없습니다.")
         }
 
@@ -90,9 +90,8 @@ class PostLikeService(
      * - 간단한 메서드는 = 로 바로 반환 가능 (Expression Body)
      */
     @Transactional(readOnly = true)
-    fun getLikeCount(postId: Long): Long {
-        return postLikeRepository.countByPostId(postId)
-    }
+    fun getLikeCount(postId: Long): Long =
+        postLikeRepository.countByPostId(postId)
 
     /**
      * 사용자가 특정 게시글에 좋아요를 눌렀는지 확인
@@ -102,10 +101,8 @@ class PostLikeService(
      * - Boolean 반환
      */
     @Transactional(readOnly = true)
-    fun isLikedByUser(postId: Long, userId: Long): Boolean {
-        // TODO: Expression Body로 작성
-        return postLikeRepository.existsByPostIdAndUserId(postId, userId)
-    }
+    fun isLikedByUser(postId: Long, userId: Long): Boolean =
+        postLikeRepository.existsByPostIdAndUserId(postId, userId)
 
     /**
      * 특정 게시글의 모든 좋아요 조회
@@ -115,9 +112,9 @@ class PostLikeService(
      * - findAllByPostId 사용
      */
     @Transactional(readOnly = true)
-    fun getLikesByPostId(postId: Long): List<PostLike> {
-        return postLikeRepository.findAllByPostId(postId)
-    }
+    fun getLikesByPostId(postId: Long): List<PostLike> =
+        postLikeRepository.findAllByPostId(postId)
+
 
     /**
      * 특정 사용자가 누른 모든 좋아요 조회
@@ -127,7 +124,7 @@ class PostLikeService(
      * - List 반환
      */
     @Transactional(readOnly = true)
-    fun getLikesByUserId(userId: Long): List<PostLike> {
-        return postLikeRepository.findAllByUserId(userId)
-    }
+    fun getLikesByUserId(userId: Long): List<PostLike> =
+        postLikeRepository.findAllByUserId(userId)
+
 }
