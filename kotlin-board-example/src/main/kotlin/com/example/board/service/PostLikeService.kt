@@ -44,13 +44,14 @@ class PostLikeService(
     @Transactional
     fun addLike(postId: Long, userId: Long): PostLike {
         // 1. 게시글 존재 확인
-        if (!postRepository.existsById(postId)) {
-            throw IllegalArgumentException("게시글을 찾을 수 없습니다. id: $postId")
+        // require 함수는 throw IllegalArgumentException 만 던지게 되어있으므로, 커스텀 예외는 if 조건문 사용해야 함.
+        require(!postRepository.existsById(postId)) {
+            "게시글을 찾을 수 없습니다. id: $postId"
         }
 
-        // 2. 이미 좋아요 했는지 확인
-        if (postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw IllegalStateException("이미 좋아요를 눌렀습니다.")
+        // 2. 이미 좋아요를 했는지 확인
+        require(postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            "이미 좋아요를 눌렀습니다."
         }
 
         // 3. 좋아요 생성
