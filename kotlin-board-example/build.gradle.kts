@@ -41,6 +41,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")  // Kotlin 리플렉션 (Spring에서 필요)
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")  // Kotlin 표준 라이브러리
 
+    // Kotlin Coroutines (비동기 프로그래밍)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")  // Coroutines 핵심 라이브러리
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")  // Spring WebFlux와 통합
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")  // CompletableFuture 지원
+
     // QueryDSL (타입 안전한 동적 쿼리 빌더)
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")

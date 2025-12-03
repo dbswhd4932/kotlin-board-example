@@ -1,7 +1,11 @@
 package com.example.board.service
 
 import com.example.board.dto.PostDto
+import com.example.board.repository.PostLikeRepository
 import com.example.board.repository.PostRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -9,8 +13,59 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PostService(
-    private val postRepositoryKt: PostRepository
+    private val postRepositoryKt: PostRepository,
+    private val postLikeRepository: PostLikeRepository
 ) {
+
+    /**
+     * 동기 방식 - 순차 실행 (성능 비교용)
+     */
+    @Transactional(readOnly = true)
+    fun getPostSync(id: Long): PostDto.PostDetailResponse {
+        val startTime = System.currentTimeMillis()
+
+        // 1. 게시글 + 댓글 조회 (순차)
+        val post = postRepositoryKt.findByIdWithComments(id)
+            ?: throw IllegalArgumentException("게시글을 찾을 수 없습니다. id: $id")
+
+        // 2. 좋아요 개수 조회 (순차)
+        val likeCount = postLikeRepository.countByPostId(id)
+
+        val duration = System.currentTimeMillis() - startTime
+        println("[동기 방식] 실행 시간: ${duration}ms")
+
+        return PostDto.PostDetailResponse.of(post, post.comments, likeCount)
+    }
+
+    /**
+     * Coroutines 방식 - 병렬 실행 (성능 비교용)
+     */
+    @Transactional(readOnly = true)
+    suspend fun getPostWithCoroutines(id: Long): PostDto.PostDetailResponse = coroutineScope {
+        val startTime = System.currentTimeMillis()
+
+        // 1. 게시글 + 댓글 조회 (병렬)
+        // Dispatchers.IO 사용 (별도 스레드 풀에서 실행)
+        val postDeferred = async(Dispatchers.IO) {
+            postRepositoryKt.findByIdWithComments(id)
+                ?: throw IllegalArgumentException("게시글을 찾을 수 없습니다. id: $id")
+        }
+
+        // 2. 좋아요 개수 조회 (병렬)
+        val likeCountDeferred = async(Dispatchers.IO) {
+            postLikeRepository.countByPostId(id)
+        }
+
+        // await(): 비동기 작업 완료 대기
+        val post = postDeferred.await()
+        val likeCount = likeCountDeferred.await()
+
+        val duration = System.currentTimeMillis() - startTime
+        println("[Coroutines 방식] 실행 시간: ${duration}ms")
+
+        PostDto.PostDetailResponse.of(post, post.comments, likeCount)
+    }
+
     // 게시글 목족 조회 (페이징)
     fun getPosts(pageable: Pageable): PostDto.PostListResponse {
         val page = postRepositoryKt.findAll(pageable)

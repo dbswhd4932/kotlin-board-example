@@ -1,5 +1,6 @@
 package com.example.board.dto
 
+import com.example.board.entity.Comment
 import com.example.board.entity.Post
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -105,7 +106,8 @@ object PostDto {
         val author: String,
         val createdAt: LocalDateTime,
         val updatedAt: LocalDateTime,
-        val comments: List<CommentDto.CommentResponse>  // CommentDto 참조
+        val comments: List<CommentDto.CommentResponse>,  // CommentDto 참조
+        val likeCount: Long // 좋아요 개수 응답 추가
     ) {
         companion object {
             fun from(post: Post): PostDetailResponse {
@@ -117,7 +119,26 @@ object PostDto {
                     createdAt = post.createdAt,
                     updatedAt = post.updatedAt,
                     // stream().map().collect() → map { }
-                    comments = post.comments.map { CommentDto.CommentResponse.from(it) }
+                    comments = post.comments.map { CommentDto.CommentResponse.from(it) },
+                    likeCount = 0
+                )
+            }
+
+            // 새로운 팩토리 메서드 추가 > 병렬 조회한 데이터를 조합하기 위함
+            fun of(
+                post: Post,
+                comments: List<Comment>,
+                likeCount: Long
+            ): PostDetailResponse {
+                return PostDetailResponse(
+                    id = post.id!!,
+                    title = post.title,
+                    content = post.content,
+                    author = post.author,
+                    createdAt = post.createdAt,
+                    updatedAt = post.updatedAt,
+                    comments = comments.map { CommentDto.CommentResponse.from(it) },
+                    likeCount = likeCount
                 )
             }
         }

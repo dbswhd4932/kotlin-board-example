@@ -79,5 +79,26 @@ class PostController(
         return ResponseEntity.noContent().build()
     }
 
+    // ==================== 성능 비교용 엔드포인트 ====================
+
+    /**
+     * 동기 방식 - 게시글 상세 조회 (순차 실행)
+     * GET /api/posts/kt/{id}/sync
+     */
+    @GetMapping("/{id}/sync")
+    fun getPostSync(@PathVariable id: Long): ResponseEntity<PostDto.PostDetailResponse> {
+        val response = postServiceKt.getPostSync(id)
+        return ResponseEntity.ok(response)
+    }
+
+    /**
+     * Coroutines 방식 - 게시글 상세 조회 (병렬 실행)
+     * GET /api/posts/kt/{id}/async
+     */
+    @GetMapping("/{id}/async")
+    suspend fun getPostAsync(@PathVariable id: Long): ResponseEntity<PostDto.PostDetailResponse> {
+        val response = postServiceKt.getPostWithCoroutines(id)
+        return ResponseEntity.ok(response)
+    }
 
 }

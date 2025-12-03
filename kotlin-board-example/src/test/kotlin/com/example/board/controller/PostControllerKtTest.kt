@@ -111,7 +111,8 @@ class PostControllerTest {
             author = "작성자",
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
-            comments = emptyList()
+            comments = emptyList(),
+            likeCount = 0,
         )
 
         every { postServiceKt.getPost(postId) } returns response

@@ -2,6 +2,8 @@ package com.example.board.service
 
 import com.example.board.dto.PostDto
 import com.example.board.entity.Post
+import com.example.board.repository.CommentRepository
+import com.example.board.repository.PostLikeRepository
 import com.example.board.repository.PostRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -38,6 +40,7 @@ class PostServiceTest {
 
     // Mock 객체 선언
     private lateinit var postRepository: PostRepository
+    private lateinit var postLikeRepository : PostLikeRepository
     private lateinit var postService: PostService
 
     // 테스트용 데이터
@@ -49,7 +52,7 @@ class PostServiceTest {
     fun setup() {
         // Mock 객체 생성
         postRepository = mockk()
-        postService = PostService(postRepository)
+        postService = PostService(postRepository, postLikeRepository)
 
         // 테스트 데이터 초기화
         testPost = Post(
