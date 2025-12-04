@@ -2,6 +2,11 @@ package com.example.board.controller
 
 import com.example.board.dto.PostLikeDto
 import com.example.board.service.PostLikeService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -31,24 +36,21 @@ import org.springframework.web.bind.annotation.*
  */
 @RestController
 @RequestMapping("/api/posts")
+@Tag(name = "좋아요 API", description = "게시글 좋아요 기능 API")
 class PostLikeController(
-    // TODO: 학습 포인트 - Constructor Injection
     private val postLikeService: PostLikeService
 ) {
 
-    /**
-     * 좋아요 추가
-     * POST /api/posts/{postId}/likes?userId={userId}
-     *
-     * [학습 포인트]
-     * - @PostMapping: HTTP POST 메서드
-     * - @PathVariable: URL 경로 변수 (postId)
-     * - @RequestParam: 쿼리 파라미터 (userId)
-     * - ResponseEntity.status(): HTTP 상태 코드 지정
-     */
+    @Operation(summary = "좋아요 추가", description = "게시글에 좋아요를 추가합니다")
+    @ApiResponses(
+        ApiResponse(responseCode = "201", description = "좋아요 추가 성공"),
+        ApiResponse(responseCode = "409", description = "이미 좋아요를 누른 경우")
+    )
     @PostMapping("/{postId}/likes")
     fun addLike(
+        @Parameter(description = "게시글 ID", example = "1", required = true)
         @PathVariable postId: Long,
+        @Parameter(description = "사용자 ID", example = "1", required = true)
         @RequestParam userId: Long
     ): ResponseEntity<PostLikeDto.LikeResponse> {
         // 1. Service 호출
@@ -66,104 +68,72 @@ class PostLikeController(
 
     }
 
-    /**
-     * 좋아요 취소
-     * DELETE /api/posts/{postId}/likes?userId={userId}
-     *
-     * [학습 포인트]
-     * - @DeleteMapping: HTTP DELETE 메서드
-     * - ResponseEntity<Unit>: 응답 본문 없음
-     * - noContent(): 204 No Content
-     */
+    @Operation(summary = "좋아요 취소", description = "게시글의 좋아요를 취소합니다")
+    @ApiResponses(
+        ApiResponse(responseCode = "204", description = "좋아요 취소 성공"),
+        ApiResponse(responseCode = "404", description = "좋아요를 찾을 수 없음")
+    )
     @DeleteMapping("/{postId}/likes")
     fun removeLike(
+        @Parameter(description = "게시글 ID", example = "1")
         @PathVariable postId: Long,
+        @Parameter(description = "사용자 ID", example = "1")
         @RequestParam userId: Long
     ): ResponseEntity<Unit> {
-        // 1. Service 호출
         postLikeService.removeLike(postId, userId)
-
-        // 2. 204 No Content 응답
         return ResponseEntity.noContent().build()
     }
 
-    /**
-     * 특정 게시글의 좋아요 개수 조회
-     * GET /api/posts/{postId}/likes/count
-     *
-     * [학습 포인트]
-     * - @GetMapping: HTTP GET 메서드
-     * - Data class로 응답
-     */
+    @Operation(summary = "좋아요 개수 조회", description = "특정 게시글의 좋아요 개수를 조회합니다")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{postId}/likes/count")
-    fun getLikeCount(@PathVariable postId: Long): ResponseEntity<PostLikeDto.LikeCountResponse> {
-        // 1. Service 호출
+    fun getLikeCount(
+        @Parameter(description = "게시글 ID", example = "1")
+        @PathVariable postId: Long
+    ): ResponseEntity<PostLikeDto.LikeCountResponse> {
         val count = postLikeService.getLikeCount(postId)
-
-        // 2. Response DTO 생성
         val response = PostLikeDto.LikeCountResponse(
             postId = postId,
             count = count
         )
-
-        // 3. 200 OK 응답
         return ResponseEntity.ok(response)
     }
 
-    /**
-     * 사용자가 특정 게시글에 좋아요를 눌렀는지 확인
-     * GET /api/posts/{postId}/likes/check?userId={userId}
-     *
-     * [학습 포인트]
-     * - Boolean 값 반환
-     */
+    @Operation(summary = "좋아요 여부 확인", description = "사용자가 특정 게시글에 좋아요를 눌렀는지 확인합니다")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{postId}/likes/check")
     fun checkLikeStatus(
+        @Parameter(description = "게시글 ID", example = "1")
         @PathVariable postId: Long,
+        @Parameter(description = "사용자 ID", example = "1")
         @RequestParam userId: Long
     ): ResponseEntity<PostLikeDto.LikeCheckResponse> {
-        // 1. Service 호출
         val isLiked = postLikeService.isLikedByUser(postId, userId)
-
-        // 2. Response DTO 생성
         val response = PostLikeDto.LikeCheckResponse(
             postId = postId,
             userId = userId,
             isLiked = isLiked
         )
-
-        // 3. 200 OK 응답
         return ResponseEntity.ok(response)
     }
 
-    /**
-     * 특정 게시글의 모든 좋아요 조회
-     * GET /api/posts/{postId}/likes
-     *
-     * [학습 포인트]
-     * - List 반환
-     * - map 함수로 Entity -> DTO 변환
-     */
+    @Operation(summary = "좋아요 목록 조회", description = "특정 게시글의 모든 좋아요 목록을 조회합니다")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{postId}/likes")
-    fun getLikesByPost(@PathVariable postId: Long): ResponseEntity<PostLikeDto.LikeListResponse> {
-        // 1. Service 호출
+    fun getLikesByPost(
+        @Parameter(description = "게시글 ID", example = "1")
+        @PathVariable postId: Long
+    ): ResponseEntity<PostLikeDto.LikeListResponse> {
         val likes = postLikeService.getLikesByPostId(postId)
-
-        // 2. Entity -> DTO 변환 (map 함수)
         val likeDtos = likes.map { like ->
             PostLikeDto.LikeInfo(like.id, like.postId, like.userId, like.createdAt)
         }
-
-        // 3. Response DTO 생성
         val response = PostLikeDto.LikeListResponse(
             postId = postId,
             count = likes.size,
             likes = likeDtos
         )
-
-        // 4. 200 OK 응답
         return ResponseEntity.ok(response)
-
     }
 }
 

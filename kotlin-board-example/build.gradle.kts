@@ -50,6 +50,9 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 
+    // Swagger (SpringDoc OpenAPI) - API 문서화
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+
     // H2 Database (개발용)
     runtimeOnly("com.h2database:h2")
 
