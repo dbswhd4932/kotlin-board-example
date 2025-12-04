@@ -3,8 +3,8 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/board}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${SPRING_DATASOURCE_USERNAME:admin}
-    password: ${SPRING_DATASOURCE_PASSWORD:1234}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -34,6 +34,7 @@ spring:
 # 로깅 설정
 logging:
   level:
+    root: INFO
     com.example.board: INFO
     org.hibernate.SQL: WARN
     org.springframework: INFO

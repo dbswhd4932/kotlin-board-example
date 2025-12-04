@@ -25,10 +25,7 @@ services:
 
   # Spring Boot 애플리케이션 (Dockerfile 기반 빌드)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: kotlin-board:latest
+    image: ${DOCKER_ID}/kotlin-board:latest
     container_name: kotlin-board-prod
     restart: unless-stopped
     ports:
