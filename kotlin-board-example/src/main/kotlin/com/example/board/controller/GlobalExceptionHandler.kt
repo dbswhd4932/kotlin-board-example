@@ -100,10 +100,12 @@ class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
+        ex.printStackTrace() // 실제 에러 출력
+
         val errorResponse = ErrorResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
             error = "Internal Server Error",
-            message = "서버 내부 오류가 발생했습니다",
+            message = ex.message ?: "서버 내부 오류가 발생했습니다",
             errors = emptyMap(),
             timestamp = LocalDateTime.now()
         )

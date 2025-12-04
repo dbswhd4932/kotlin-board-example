@@ -53,8 +53,9 @@ dependencies {
     // Swagger (SpringDoc OpenAPI) - API 문서화
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
-    // H2 Database (개발용)
-    runtimeOnly("com.h2database:h2")
+    // Database Drivers
+    runtimeOnly("com.h2database:h2")  // H2 Database (개발용)
+    runtimeOnly("com.mysql:mysql-connector-j")  // MySQL Driver (프로덕션용)
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -66,7 +66,8 @@ class PostService(
         PostDto.PostDetailResponse.of(post, post.comments, likeCount)
     }
 
-    // 게시글 목족 조회 (페이징)
+    // 게시글 목록 조회 (페이징)
+    @Transactional(readOnly = true)
     fun getPosts(pageable: Pageable): PostDto.PostListResponse {
         val page = postRepositoryKt.findAll(pageable)
 

@@ -31,3 +31,5 @@ bin/
 
 # H2 Database
 *.db
+
+.env

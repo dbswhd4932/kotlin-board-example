@@ -36,11 +36,24 @@ class PostController(
     )
     @GetMapping
     fun getPosts(
-        @Parameter(description = "페이징 요청 (page, size, sortBy, direction)", required = false)
-        request: PostDto.PageRequest
+        @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+        @RequestParam(defaultValue = "0") page: Int,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") size: Int,
+        @Parameter(description = "정렬 기준 필드", example = "createdAt")
+        @RequestParam(defaultValue = "createdAt") sortBy: String,
+        @Parameter(description = "정렬 방향", example = "DESCENDING")
+        @RequestParam(defaultValue = "DESCENDING") direction: String
     ): ResponseEntity<PostDto.PostListResponse> {
 
-        val pageable = request.toPageable() // Extension 사용
+        val sortDirection = try {
+            PostDto.SortDirection.valueOf(direction.uppercase())
+        } catch (_: IllegalArgumentException) {
+            PostDto.SortDirection.DESCENDING
+        }
+
+        val request = PostDto.PageRequest(page, size, sortBy, sortDirection)
+        val pageable = request.toPageable()
         val response = postServiceKt.getPosts(pageable)
 
         return ResponseEntity.ok(response)
@@ -66,11 +79,24 @@ class PostController(
     )
     @GetMapping("/search")
     fun searchPost(
-        @Parameter(description = "페이징 요청", required = false)
-        request: PostDto.PageRequest,
         @Parameter(description = "검색 키워드", example = "Kotlin", required = true)
-        @RequestParam keyword: String
+        @RequestParam keyword: String,
+        @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+        @RequestParam(defaultValue = "0") page: Int,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") size: Int,
+        @Parameter(description = "정렬 기준 필드", example = "createdAt")
+        @RequestParam(defaultValue = "createdAt") sortBy: String,
+        @Parameter(description = "정렬 방향", example = "DESCENDING")
+        @RequestParam(defaultValue = "DESCENDING") direction: String
     ): ResponseEntity<PostDto.PostListResponse> {
+        val sortDirection = try {
+            PostDto.SortDirection.valueOf(direction.uppercase())
+        } catch (_: IllegalArgumentException) {
+            PostDto.SortDirection.DESCENDING
+        }
+
+        val request = PostDto.PageRequest(page, size, sortBy, sortDirection)
         val pageable = request.toPageable()
         val response = postServiceKt.searchPost(keyword, pageable)
 
