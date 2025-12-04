@@ -144,6 +144,17 @@ object PostDto {
         }
     }
 
+    data class PageRequest(
+        val page: Int = 0,
+        val size: Int = 20,
+        val sortBy: String = "createdAt",
+        val direction: SortDirection = SortDirection.DESCENDING
+    )
+
+    enum class SortDirection {
+        ASCENDING, DESCENDING
+    }
+
     /**
      * 게시글 목록 응답 DTO (페이징 정보 포함)
      *
