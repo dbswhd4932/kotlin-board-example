@@ -61,6 +61,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.8")  // Kotlin 전용 Mocking 라이브러리
     testImplementation("com.ninja-squad:springmockk:4.0.2")  // Spring + MockK 통합
+
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 // kapt에 Java 컴파일러 모듈 접근 권한 부여 (Java 9+ 모듈 시스템 대응)
